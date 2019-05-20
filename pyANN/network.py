@@ -11,7 +11,7 @@ class Network(object):
 
     def feedforward(self, a):
         for b, w in zip(self.biases, self.weights):
-            a = sigmoid(np.dot(a, w) + b)
+            a = sigmoid(np.dot(w, a) + b)
         return a
 
     def SGD(self, training_data, epoches, mini_batch_size, eta, test_data=None):
@@ -27,9 +27,9 @@ class Network(object):
         if test_data:
             n_test = len(test_data)
         n = len(training_data)
-        for j in xrange(epoches):
+        for j in range(epoches):
             random.shuffle(training_data)
-            mini_batches = [training_data[k:k+mini_batch_size] for k in xrange(0, n, mini_batch_size)]
+            mini_batches = [training_data[k:k+mini_batch_size] for k in range(0, n, mini_batch_size)]
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta)
             if test_data:
@@ -75,13 +75,20 @@ class Network(object):
         nabla_w[-1] = np.dot(delta, activations[-2].transpose())
         # Note that the variable l in the loop uses a reverse order.
         # Here, l=1 means the last layer of neurons, l=2 is the second-last layer, and so on.
-        for l in xrange(2, self.num_layers):
+        for l in range(2, self.num_layers):
             z = zs[-l]
             sp = sigmoid_prime(z)
             delta = np.dot(self.weights[-l + 1].transpose(), delta) * sp
             nabla_b[-l] = delta
-            nabla_w = np.dot(delta, activations[-l - 1].transpose())
+            nabla_w[-l] = np.dot(delta, activations[-l - 1].transpose())
         return (nabla_b, nabla_w)
+
+    def evaluate(self, test_data):
+        """
+        Return the number of test inputs for which the neural network outputs the correct result.
+        """
+        test_results = [(np.argmax(self.feedforward(x)), y) for (x, y) in test_data]
+        return sum(int(x == y) for (x, y) in test_results)
 
     def cost_derivative(self, output_activations, y):
         '''
