@@ -6,6 +6,7 @@ initialization of network weights.
 """
 import numpy as np
 import random
+import json
 
 
 class Network():
@@ -132,6 +133,50 @@ class Network():
             nabla_b[-l] = delta
             nabla_w[-l] = np.dot(delta, activations[-l - 1].transpose())
         return (nabla_b, nabla_w)
+
+    def accuracy(self, data, convert=False):
+        """
+        Return the number of inputs in 'data' for which the neural network outputs the correct result.
+        The neural network's output is assumed to be the index of whichever neural in the final layer has the
+            highest activation.
+        The flag 'convert' should be set to False if the data set is validation or test data(the usual case),
+            and to True if the data set is the training data.
+        The program usually evaluates the cost on the training data and the accuracy on other data sets.
+        These are different types of computations, and using different representations speeds things up.
+        """
+        if convert:
+            results = [(np.argmax(self.feedforward(x)), np.argmax(y)) for (x, y) in data]
+        else:
+            results = [(np.argmax(self.feedforward(x)), y) for (x, y) in data]
+        return sum(int(x == y) for (x, y) in results)
+
+
+    def total_cost(self, data, lmbda, convert=False):
+        """
+        Return the total cost for the data set 'data'.
+        The flag 'convert' should be set to False if the data set is thr training set(the usual case), and
+        to True if others.
+        """
+        cost = 0.0
+        for x, y in data:
+            a = self.feedforward(x)
+            if convert:
+                y = vectorized_result(y)
+            cost += self.cost.fn(a, y)/len(data)
+        cost += 0.5 * (lmbda / len(data)) * sum(np.linalg.norm(w)**2 for w in self.weights)
+        return cost
+
+
+    def save(self, filename):
+        """
+        Save the neural network to the file 'filename'.
+        """
+        data = {"sizes": self.sizes, 
+                "weights": [w.tolist() for w in self.weights], 
+                "biases": [b.tolist() for b in self.biases], 
+                "cost": str(self.cost.__name__)}
+        with open(filename, "w") as f:
+            json.dump(data, f)
 
 
 class CrossEntropyCost():
