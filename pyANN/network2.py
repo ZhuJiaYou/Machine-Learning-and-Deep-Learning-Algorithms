@@ -7,9 +7,10 @@ initialization of network weights.
 import numpy as np
 import random
 import json
+import sys
 
 
-class Network():
+class Network(object):
     def __init__(self, sizes, cost=CrossEntropyCost):
         self.num_layers = len(sizes)
         self.sizes = sizes
@@ -102,8 +103,7 @@ class Network():
         self.weights = [(1-eta*(lmbda/n))*w-(eta/len(mini_batch))*nw for w, nw in zip(self.weights, nabla_w)]
         self.biases = [b-(eta/len(mini_batch))*nb for b, nb in zip(self.biases, nabla_b)]
 
-
-    def backprop(self, x, y)
+    def backprop(self, x, y):
         '''
         Return a tuple (nabla_b, nabla_w) representing the gradient for the cost function C_x.
         nabla_b and nabla_w are layer-by-layer lists of numpy arrays, 
@@ -150,7 +150,6 @@ class Network():
             results = [(np.argmax(self.feedforward(x)), y) for (x, y) in data]
         return sum(int(x == y) for (x, y) in results)
 
-
     def total_cost(self, data, lmbda, convert=False):
         """
         Return the total cost for the data set 'data'.
@@ -166,7 +165,6 @@ class Network():
         cost += 0.5 * (lmbda / len(data)) * sum(np.linalg.norm(w)**2 for w in self.weights)
         return cost
 
-
     def save(self, filename):
         """
         Save the neural network to the file 'filename'.
@@ -179,7 +177,21 @@ class Network():
             json.dump(data, f)
 
 
+def load(filename):
+    """
+    Load a Network
+    """
+    with open(filename, "r") as f:
+        data = json.load(f)
+    cost = getattr(sys.modules[__name__], data["cost"])
+    net = Network(data["sizes"], cost=cost)
+    net.weights = [np.array(w) for w in data["weights"]]
+    net.biases = [np.array(b) for b in data["biases"]]
+    return net
+
+
 class CrossEntropyCost():
+
     @staticmethod
     def fn(a, y):
         return np.sum(np.nan_to_num(-y*np.log(a) - (1-y)*np.log(1-a)))
@@ -199,6 +211,16 @@ class QuadraticCost():
         return (a - y) * sigmoid_prime(z)
 
 
+def vectorized_result(j):
+    """
+    Return a 10-dimensional unit vector with a 1.0 in the j'th position and zeros elsewhere.
+    This is used to convert a digit(0...9) into a corresponding desired output from the neural network.
+    """
+    e = np.zeros((10, 1))
+    e[j] = 1.0
+    return e
+
+
 def sigmoid_prime(z):
     '''
     Derivative of the sigmoid function.
@@ -211,4 +233,5 @@ def sigmoid(z):
 
 
 if __name__ == '__main__':
+    print("Do You Know??")
 
