@@ -10,7 +10,27 @@ import json
 import sys
 
 
-class Network(object):
+class CrossEntropyCost:
+    @staticmethod
+    def fn(a, y):
+        return np.sum(np.nan_to_num(-y*np.log(a) - (1-y)*np.log(1-a)))
+
+    @staticmethod
+    def delta(z, a, y):
+        return (a - y)
+
+
+class QuadraticCost:
+    @staticmethod
+    def fn(a, y):
+        return 0.5 * np.linalg.norm(a - y) ** 2
+
+    @staticmethod
+    def delta(z, a, y):
+        return (a - y) * sigmoid_prime(z)
+
+
+class Network:
     def __init__(self, sizes, cost=CrossEntropyCost):
         self.num_layers = len(sizes)
         self.sizes = sizes
@@ -19,15 +39,16 @@ class Network(object):
 
     def default_weight_initializer(self):
         self.biases = [np.random.randn(y, 1) for y in self.sizes[1:]]
-        self.weights = [np.random.randn(y, x) / np.sqrt(x) for x, y in zip(sizes[:-1], self.sizes[1:])]
+        self.weights = [np.random.randn(y, x) / np.sqrt(x) for x, y in zip(self.sizes[:-1], self.sizes[1:])]
 
     def large_weight_initializer(self):
         self.biases = [np.random.randn(y, 1) for y in self.sizes[1:]]
-        self.weights = [np.random.randn(y, x) for x, y in zip(sizes[:-1], self.sizes[1:])]
+        self.weights = [np.random.randn(y, x) for x, y in zip(self.sizes[:-1], self.sizes[1:])]
 
     def feedforward(self, a):
         for b, w in zip(self.biases, self.weights):
             a = sigmoid(np.dot(w, a) + b)
+        return a
 
     def SGD(self, training_data, epochs, mini_batch_size, eta, 
             lmbda = 0.0, 
@@ -75,13 +96,14 @@ class Network(object):
                 training_accuracy.append(accuracy)
                 print("Accuracy on training data: {0} / {1}".format(accuracy, n))
             if monitor_evaluation_cost:
-                cost = self.total_cost(evaluation_data, lmbda)
+                cost = self.total_cost(evaluation_data, lmbda, convert=True)
                 evaluation_cost.append(cost)
                 print("Cost on evaluation data: {}".format(cost))
             if monitor_evaluation_accuracy:
-                accuracy = self.accuracy(evaluation_data, convert=True)
+                accuracy = self.accuracy(evaluation_data)
                 evaluation_accuracy.append(accuracy)
-                print("Accuracy on evaluation data: {0} / {1}".format(accuracy, n))
+                print("Accuracy on evaluation data: {0} / {1} = {2}".format(accuracy, n_data, 
+                      accuracy / n_data))
             print
         return evaluation_cost, evaluation_accuracy, training_cost, training_accuracy
 
@@ -188,27 +210,6 @@ def load(filename):
     net.weights = [np.array(w) for w in data["weights"]]
     net.biases = [np.array(b) for b in data["biases"]]
     return net
-
-
-class CrossEntropyCost():
-
-    @staticmethod
-    def fn(a, y):
-        return np.sum(np.nan_to_num(-y*np.log(a) - (1-y)*np.log(1-a)))
-
-    @staticmethod
-    def delta(z, a, y):
-        return (a - y)
-
-
-class QuadraticCost():
-    @staticmethod
-    def fn(a, y):
-        return 0.5 * np.linalg.norm(a - y) ** 2
-
-    @staticmethod
-    def delta(z, a, y):
-        return (a - y) * sigmoid_prime(z)
 
 
 def vectorized_result(j):
