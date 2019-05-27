@@ -7,7 +7,7 @@ import random
 import sys
 
 import matplotlib
-matplotlib.use('Agg')
+# matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -66,7 +66,8 @@ def make_plots(filename, num_epoches,
     with open(filename, "r") as f:
         test_cost, test_accuracy, training_cost, training_accuracy = json.load(f)
     plot_training_cost(training_cost, num_epoches, training_cost_xmin)
-    plot_test_accuracy(test_accuracy, num_epoches, test_accuracy)
+    plot_test_cost(test_cost, num_epoches, test_cost_xmin)
+    plot_test_accuracy(test_accuracy, num_epoches, test_accuracy_xmin)
     plot_training_accuracy(training_accuracy, num_epoches, training_accuracy_xmin, training_set_size)
     plot_overlay(test_accuracy, training_accuracy, num_epoches, 
                  min(test_accuracy_xmin, training_accuracy_xmin), training_set_size)
@@ -81,6 +82,7 @@ def plot_training_cost(training_cost, num_epoches, training_cost_xmin):
     ax.grid(True)
     ax.set_xlabel('Epoch')
     ax.set_title('Cost on the training data')
+    plt.savefig('./figs/train_cost.png')
     plt.show()
 
 
@@ -93,10 +95,11 @@ def plot_test_cost(test_cost, num_epoches, test_cost_xmin):
     ax.grid(True)
     ax.set_xlabel('Epoch')
     ax.set_title('Cost on the test data')
+    plt.savefig('./figs/test_cost.png')
     plt.show()
 
 
-def plot_test_accuracy(test_accuracy, num_epoches, test_accuracy):
+def plot_test_accuracy(test_accuracy, num_epoches, test_accuracy_xmin):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.plot(np.arange(test_accuracy_xmin, num_epoches), 
@@ -106,6 +109,7 @@ def plot_test_accuracy(test_accuracy, num_epoches, test_accuracy):
     ax.grid(True)
     ax.set_xlabel('Epoch')
     ax.set_title('Accuracy(%) on the test data')
+    plt.savefig('./figs/test_accuracy.png')
     plt.show()
 
 
@@ -120,6 +124,7 @@ def plot_training_accuracy(training_accuracy, num_epoches, training_accuracy_xmi
     ax.grid(True)
     ax.set_xlabel('Epoch')
     ax.set_title('Accuracy(%) on the training data')
+    plt.savefig('./figs/train_accuracy.png')
     plt.show()
 
 
@@ -128,18 +133,32 @@ def plot_overlay(test_accuracy, training_accuracy, num_epoches, xmin, training_s
     ax = fig.add_subplot(111)
     ax.plot(np.arange(xmin, num_epoches), 
             [accuracy / 100.0 for accuracy in test_accuracy],
-            color='#2A6EA6', 
+            color='r', 
             label='Accuracy on the test data')
     ax.plot(np.arange(xmin, num_epoches), 
             [accuracy * 100.0 / training_set_size for accuracy in training_accuracy],
-            color='#FFA933', 
-            label='Accuracy on the training data'))
-    ax.set_xlim([test_accuracy_xmin, num_epoches])
+            color='b', 
+            label='Accuracy on the training data')
     ax.grid(True)
+    ax.set_xlim([xmin, num_epoches])
     ax.set_xlabel('Epoch')
-    ax.set_title('Accuracy(%) on the test data')
+    ax.set_ylim([80, 100])
+    plt.legend(loc='lower right')
+    plt.savefig('./figs/overlay.png')
     plt.show()
 
 
 if __name__ == '__main__':
-
+    """
+    filename = input("Enter a file name: ")
+    num_epoches = int(input("Enter the number of epoches to run for: "))
+    training_cost_xmin = int(input("training_cost_xmin(suggest 200): "))
+    test_accuracy_xmin = int(input("test_accuracy_xmin(suggest 200): "))
+    test_cost_xmin = int(input("test_cost_xmin(suggest 0): "))
+    training_accuracy_xmin = int(input("training_accuracy_xmin(suggest 0): "))
+    training_set_size = int(input("Training set size(suggest 1000): "))
+    lmbda = float(input("Enter the regularization parameter, lambda(suggest 5.0): "))
+    main(filename, num_epoches, training_cost_xmin, test_accuracy_xmin, test_cost_xmin, 
+         training_accuracy_xmin, training_set_size, lmbda)
+    """
+    make_plots("monitor.json", 400, 200, 200, 0, 0, 1000)
