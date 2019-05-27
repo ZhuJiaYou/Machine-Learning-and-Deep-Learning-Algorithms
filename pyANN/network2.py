@@ -86,7 +86,7 @@ class Network:
             mini_batchs = [training_data[k:k+mini_batch_size] for k in range(0, n, mini_batch_size)]
             for mini_batch in mini_batchs:
                 self.update_mini_batch(mini_batch, eta, lmbda, len(training_data))
-            print("Epoch {} traning complete".format(j))
+            print("Epoch {} training complete".format(j))
             if monitor_training_cost:
                 cost = self.total_cost(training_data, lmbda)
                 training_cost.append(cost)

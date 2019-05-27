@@ -149,7 +149,6 @@ def plot_overlay(test_accuracy, training_accuracy, num_epoches, xmin, training_s
 
 
 if __name__ == '__main__':
-    """
     filename = input("Enter a file name: ")
     num_epoches = int(input("Enter the number of epoches to run for: "))
     training_cost_xmin = int(input("training_cost_xmin(suggest 200): "))
@@ -160,5 +159,4 @@ if __name__ == '__main__':
     lmbda = float(input("Enter the regularization parameter, lambda(suggest 5.0): "))
     main(filename, num_epoches, training_cost_xmin, test_accuracy_xmin, test_cost_xmin, 
          training_accuracy_xmin, training_set_size, lmbda)
-    """
-    make_plots("monitor.json", 400, 200, 200, 0, 0, 1000)
+#    make_plots("monitor.json", 400, 200, 200, 0, 0, 1000)
