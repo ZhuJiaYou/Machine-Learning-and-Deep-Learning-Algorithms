@@ -1,5 +1,5 @@
 """weight_initialization.py
---------------
+---------------------------
 This program shows how weight_initialization affects training.
 """
 import json
