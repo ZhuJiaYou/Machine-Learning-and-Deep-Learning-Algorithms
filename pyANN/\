@@ -29,22 +29,11 @@ def main():
     initial_norms(training_data, net)
     abbreviated_gradient = [ag[:6] for ag in get_average_gradient(net, training_data)[:-1]]
     print("Saving the averaged gradient for the top six nerons in each layer.")
-    with open("./js/initial_gradient.json", "w") as f:
+    with open("initial_gradient.json", "w") as f:
         json.dump(abbreviated_gradient, f)
-    training(training_data, net, epoches, "./js/norms_during_training_2_layers.json")
-    plot_training(epoches, "./js/norms_during_training_2_layers.json", 2)
-
-    print("\nThree hidden layers:")
-    net = network2.Network([784, 30, 30, 30, 10])
-    initial_norms(training_data, net)
-    training(training_data, net, epoches, "./js/norms_during_training_3_layers.json")
-    plot_training(epoches, "./js/norms_during_training_3_layers.json", 3)
-
-    print("\nFour hidden layers:")
-    net = network2.Network([784, 30, 30, 30, 30, 10])
-    initial_norms(training_data, net)
-    training(training_data, net, epoches, "./js/norms_during_training_4_layers.json")
-    plot_training(epoches, "./js/norms_during_training_4_layers.json", 4)
+    shutil.copy("initial_gradient.json", "./js/initial_gradient.json")
+    training(training_data, net, epoches, "norms_during_training_2_layers.json")
+    plot_training(epoches, "norms_during_training_2_layers.json", 2)
 
 
 def initial_norms(training_data, net):
@@ -56,6 +45,7 @@ def initial_norms(training_data, net):
 def get_average_gradient(net, training_data):
     nabla_b_results = [net.backprop(x, y)[0] for (x, y) in training_data]
     gradient = list_sum(nabla_b_results)
+    print(len(gradient))
     return [(np.reshape(g, len(g)) / len(training_data)).tolist() for g in gradient]
 
 
@@ -98,7 +88,7 @@ def plot_training(epoches, filename, num_layers):
     ax.set_yscale('log')
     plt.legend(loc='upper right')
     fig_filename = "training_speed_{}_layers.png".format(num_layers)
-    plt.savefig('./figs/{}'.format(fig_filename))
+    plt.savefig('./figs/fig_filename')
     plt.show()
 
 
