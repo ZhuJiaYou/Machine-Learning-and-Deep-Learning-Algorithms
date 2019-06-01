@@ -55,5 +55,23 @@ def dataset_loader():
 
 
 def conv(img, conv_filter):
+    if len(img.shape) != 3 or len(conv_filter.shape) != 4:
+        print("Error Dimension of the Conv Op!")
+        sys.exit()
+    if img.shape[-1] != conv_filter.shape[-1]:
+        print("Channel of the img should be the same as conv filter!")
+        sys.exit()
+    img_h, img_w, img_ch = img.shape
+    filter_num, filter_h, filter_w, img_ch = conv_filter.shape
+
+
+def soft_max(z):
+    tmp = np.max(z)
+    z -= tmp
+    z = np.exp(z)
+    tmp = np.sum(z)
+    z /= tmp
+
+    return z
 
 
