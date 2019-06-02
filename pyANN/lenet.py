@@ -61,8 +61,35 @@ def conv(img, conv_filter):
     if img.shape[-1] != conv_filter.shape[-1]:
         print("Channel of the img should be the same as conv filter!")
         sys.exit()
+
     img_h, img_w, img_ch = img.shape
     filter_num, filter_h, filter_w, img_ch = conv_filter.shape
+    feature_h = img_h - filter_h + 1
+    feature_w = img_w - filter_w + 1
+    
+    img_out = np.zeros((feature_h, feature_w, filter_num))
+    img_matrix = np.zeros((feature_h*feature_w, filter_h*filter_w*img_ch))
+    filter_matrix = np.zeros((filter_h*filter_w*img_ch, filter_num))
+
+    for j in range(img_ch):
+        img_2d = np.copy(img[:,:,j])
+        shape = (feature_h, feature_w, filter_h, filter_w)
+        strides = (img_w, 1, img_w, 1)
+        strides = img_2d.itemsize * np.array(strides)
+        x_stride = np.lib.stride_tricks.as_strided(img_2d, shape=shape, strides=strides)
+        x_cols = np.ascontiguousarray(x_stride)
+        x_cols = x_cols.reshape(feature_h*feature_w, filter_h*filter_w)
+        img_matrix[:,j*filter_h*filter_w:(j+1)*filter_h*filter_w] = x_cols
+
+    for i in range(filter_num):
+        filter_matrix[:,1] = conv_filter[i,:].transpose(2,0,1).reshape(filter_w*filter_h*img_ch)
+
+    feature_matrix = np.dot(img_matrix, filter_matrix)
+
+    for i in range(filter_num):
+        img_out[:,:,i] = feature_matrix[:,i].reshape(feature_h, feature_w)
+
+    return img_out
 
 
 def soft_max(z):
