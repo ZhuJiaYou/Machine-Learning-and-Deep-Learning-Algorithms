@@ -2,11 +2,11 @@
 Implementation of LeNet
 """
 import sys
+import matplotlib
+matplotlib.use('Agg')
 import numpy as np
 import matplotlib.pyplot as plt
 from struct import unpack
-import matplotlib
-# matplotlib.use('Agg')
 
 
 class ConvNet:
@@ -44,7 +44,7 @@ class ConvNet:
         full_connect2_a = relu(full_connect2_z)
 
         full_connect3_z = np.dot(self.weights[2], full_connect2_a) + self.biases[2]
-        full_connect3_a = relu(full_connect3_z)
+        full_connect3_a = soft_max(full_connect3_z)
 
         return full_connect3_a
 
@@ -123,7 +123,7 @@ class ConvNet:
         full_connect2_a = relu(full_connect2_z)
 
         full_connect3_z = np.dot(self.weights[2], full_connect2_a) + self.biases[2]
-        full_connect3_a = relu(full_connect3_z)
+        full_connect3_a = soft_max(full_connect3_z)
 
         delta_fc3 = full_connect3_a - y
         delta_fc2 = np.dot(self.weights[2].transpose(), delta_fc3) * relu_prime(full_connect2_z)
@@ -140,7 +140,7 @@ class ConvNet:
         nabla_w1 = np.dot(delta_fc2, full_connect1_a.transpose())
         nabla_b1 = delta_fc2
         nabla_w0 = np.dot(delta_fc1, straight_input.transpose())
-        nabla_b2 = delta_fc1
+        nabla_b0 = delta_fc1
 
         nabla_filters1 = conv_cal_w(delta_conv2, pool1)
         nabla_filters_biases1 = conv_cal_b(delta_conv2)
@@ -181,7 +181,7 @@ def read_label(path):
 
 
 def normalize_image(image):
-    img = img.astype(np.float32) / 255.0
+    img = image.astype(np.float32) / 255.0
     return img
 
 
@@ -196,11 +196,11 @@ def padding(image, zero_num):
     if len(image.shape) == 4:
         image_padding = np.zeros((image.shape[0], image.shape[1] + 2 * zero_num, 
                                   image.shape[2] + 2 * zero_num, image.shape[3]))
-        image_padding[:,zero_num:image.shape[1] + zero_num, zero_num:image.shape[2] + zero_num] = image
+        image_padding[:,zero_num:image.shape[1] + zero_num, zero_num:image.shape[2] + zero_num,:] = image
     elif len(image.shape) == 3:
         image_padding = np.zeros((image.shape[0] + 2 * zero_num, image.shape[1] + 2 * zero_num, 
                                   image.shape[2]))
-        image_padding[zero_num:image.shape[0] + zero_num, zero_num:image.shape[1] + zero_num] = image
+        image_padding[zero_num:image.shape[0] + zero_num, zero_num:image.shape[1] + zero_num,:] = image
     else:
         print("Error Image Demensions!")
         sys.exit()
@@ -283,10 +283,10 @@ def conv_cal_w(out_img_delta, in_img):
         x_stride = np.lib.stride_tricks.as_strided(img_2d, shape=shape, strides=strides)
         x_cols = np.ascontiguousarray(x_stride)
         x_cols = x_cols.reshape(filter_h*filter_w, feature_h*feature_w)
-        img_matrix[j*filter_h*filter_w:(j+1)*filter_h*filter_w,:] = x_cols
+        in_img_matrix[j*filter_h*filter_w:(j+1)*filter_h*filter_w,:] = x_cols
 
     for i in range(filter_num):
-        out_img_delta_matrix[:,1] = out_img_delta[:,:,i].reshape(feature_h*feature_w)
+        out_img_delta_matrix[:,i] = out_img_delta[:,:,i].reshape(feature_h*feature_w)
 
     filter_matrix = np.dot(in_img_matrix, out_img_delta_matrix)
     nabla_conv = np.zeros([filter_num, filter_h, filter_w, img_ch])
@@ -299,7 +299,7 @@ def conv_cal_w(out_img_delta, in_img):
 
 def conv_cal_b(out_img_delta):
     nabla_b = np.zeros((out_img_delta.shape[-1],1))
-    for i in range(out_img_delta[-1]):
+    for i in range(out_img_delta.shape[-1]):
         nabla_b[i] = np.sum(out_img_delta[:,:,i])
     return nabla_b
 
@@ -375,7 +375,7 @@ def add_bias(conv, bias):
 def main():
     train_image, train_label, test_image, test_label = dataset_loader()
     net = ConvNet()
-    net.SGD(train_image, train_label, test_image, test_label, 50, 100, 1e-5)
+    net.SGD(train_image, train_label, test_image, test_label, 50, 100, 3e-5)
 
 
 if __name__ == '__main__':
