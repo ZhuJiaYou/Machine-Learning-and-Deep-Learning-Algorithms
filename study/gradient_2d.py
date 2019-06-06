@@ -36,8 +36,6 @@ def _numerical_gradient_no_batch(f, x):
      
 if __name__ == '__main__':
     x0 = np.arange(-2, 2.5, 0.25)
-
-
     x1 = np.arange(-2, 2.5, 0.25)
     X, Y = np.meshgrid(x0, x1)
     
@@ -48,7 +46,6 @@ if __name__ == '__main__':
     b = np.array([1, 2, 3])
 
     grad = numerical_gradient(func_2, np.array([X, Y]).T).T
-    print(grad.shape)
 
     plt.figure()
     plt.quiver(X, Y, -grad[0], -grad[1],  angles="xy", color="#555555")
