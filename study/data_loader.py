@@ -7,7 +7,7 @@ import numpy as np
 def read_image(path):
     with open(path, "rb") as f:
         magic, num, rows, cols = unpack(">4I", f.read(16))
-        img = np.fromfile(f, dtype=np.uint8).reshape(num, rows * cols)  # Add channels' num of pics
+        img = np.fromfile(f, dtype=np.uint8).reshape(num, rows*cols)  # Add channels' num of pics
     return img
 
 

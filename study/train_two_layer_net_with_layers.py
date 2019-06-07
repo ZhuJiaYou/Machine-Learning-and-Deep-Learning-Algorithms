@@ -3,7 +3,7 @@ import numpy as np
 
 import matplotlib.pylab as plt
 
-from two_layer_net import TwoLayerNet
+from two_layer_net_with_layers import TwoLayerNet
 from data_loader import dataset_loader
 
 
@@ -25,7 +25,7 @@ for i in range(iters_num):
     x_batch = x_train[batch_mask]
     t_batch = t_train[batch_mask]
 
-    grad = network.numerical_gradient(x_batch, t_batch)
+    grad = network.gradient(x_batch, t_batch)
 
     for key in ('w1', 'b1', 'w2', 'b2'):
         network.params[key] -= learning_rate * grad[key]
@@ -47,6 +47,5 @@ plt.ylabel("accuracy")
 plt.ylim(0, 1.0)
 plt.legend(loc="lower right")
 plt.show()
-
 
 
