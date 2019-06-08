@@ -1,4 +1,3 @@
-import sys, os
 import numpy as np
 from collections import OrderedDict
 
@@ -6,7 +5,7 @@ from common.gradient import numerical_gradient
 from common.layers import *
 
 
-class TwoLayerNet:
+class MultiLayerNet:
     def __init__(self, input_size, hidden_size, output_size, weight_init_std=0.01):
         self.params = {}
         self.params['w1'] = weight_init_std * np.random.randn(input_size, hidden_size)
