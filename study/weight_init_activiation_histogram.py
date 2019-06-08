@@ -30,8 +30,8 @@ for i in range(hidden_layer_size):
     w = np.random.randn(node_num, node_num) * np.sqrt(2.0 / node_num)
     z = np.dot(x, w)
 #    a = sigmoid(z)
-#    a = ReLU(z)
-    a = tanh(z)
+    a = ReLU(z)
+#    a = tanh(z)
     activiations[i] = a
 
 for i, a in activiations.items():
