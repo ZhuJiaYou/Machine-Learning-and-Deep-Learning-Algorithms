@@ -5,7 +5,7 @@ from common.gradient import numerical_gradient
 from common.layers import *
 
 
-class MultiLayerNet:
+class MultiLayerNetExtend:
     def __init__(self, input_size, hidden_size_list, output_size, activation='relu', 
                  weight_init_std='relu', weight_decay_lambda=0, 
                  use_dropout=False, dropout_ratio=0.5, use_batchnorm=False):
@@ -16,6 +16,7 @@ class MultiLayerNet:
         self.use_dropout = use_dropout
         self.weight_decay_lambda = weight_decay_lambda
         self.use_batchnorm = use_batchnorm
+        self.params = {}
 
         self.__init_weight(weight_init_std)
 
@@ -48,7 +49,7 @@ class MultiLayerNet:
             self.params['b'+str(idx)] = np.zeros(all_size_list[idx])
 
     def predict(self, x, train_flg=False):
-        for layer in self.layers.values():
+        for key, layer in self.layers.items():
             if "Dropout" in key or "BatchNorm" in key:
                 x = layer.forward(x, train_flg)
             else:
@@ -95,7 +96,7 @@ class MultiLayerNet:
             dout = layer.backward(dout)
         grads = {}
         for idx in range(1, self.hidden_layer_num+2):
-            grads['w'+str(idx)] = self.layers['Affine'+str(idx)].dw + 
+            grads['w'+str(idx)] = self.layers['Affine'+str(idx)].dw + \
                                   self.weight_decay_lambda * self.layers['Affine'+str(idx)].w
             grads['b'+str(idx)] = self.layers['Affine'+str(idx)].db
             if self.use_batchnorm and idx != self.hidden_layer_num + 1:

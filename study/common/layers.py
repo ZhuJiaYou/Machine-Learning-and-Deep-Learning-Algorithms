@@ -42,7 +42,7 @@ class BatchNormalization:
         return out.reshape(*self.input_shape)
 
     def __forward(self, x, train_flg):
-        if self.running_mean == None:
+        if self.running_mean is None:
             N, D = x.shape
             self.running_mean = np.zeros(D)
             self.running_var = np.zeros(D)
@@ -56,8 +56,8 @@ class BatchNormalization:
             self.xc = xc
             self.xn = xn
             self.std = std
-            self.running_mean = self.momentum * self.running_mean + (1-momentum) * mu
-            self.running_var = self.momentum * self.running_var + (1-momentum) * var
+            self.running_mean = self.momentum * self.running_mean + (1-self.momentum) * mu
+            self.running_var = self.momentum * self.running_var + (1-self.momentum) * var
         else:
             xc = x - self.running_mean
             xn = xc / np.sqrt(self.running_var + 1e-7)
@@ -65,9 +65,9 @@ class BatchNormalization:
         return out
 
     def backward(self, dout):
-        if x.ndim != 2:
-            N, C, H, W = x.shape
-            x = x.reshape(N, -1)
+        if dout.ndim != 2:
+            N, C, H, W = dout.shape
+            dout = dout.reshape(N, -1)
         dx = self.__backward(dout)
         return dx.reshape(*self.input_shape)
 
