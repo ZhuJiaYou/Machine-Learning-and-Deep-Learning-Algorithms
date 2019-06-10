@@ -1,5 +1,18 @@
 import numpy as np
 from common.funcs import *
+from common.util import im2col
+
+
+class Convolution:
+    def __init__(self, w, b, stride=1, pad=0):
+        self.w = w
+        self.b = b
+        self.stride = stride
+        self.pad = pad
+    def forward(self, x):
+        FN, C, FH, FW = self.w.shape
+        N, C, H, W = x.shape
+        
 
 
 class Dropout:
