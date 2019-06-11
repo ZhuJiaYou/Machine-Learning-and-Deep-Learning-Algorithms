@@ -67,12 +67,14 @@ def col2im(col, input_shape, filter_h, filter_w, stride=1, pad=0):
         y_max = y + stride * out_h
         for x in range(filter_w):
             x_max = x + stride * out_w
-            img[:, :, y:y_max:stride, x:x_max:stride] += col[:, :, y, x, :, :]
+            img[:, :, y:y_max:stride, x:x_max:stride] += col[:, :, y, x, :, :]  # NOTICE THE += OPERATOR
     return img[:, :, pad:H+pad, pad:W+pad]
 
 
-
 if __name__ == '__main__':
-    x1 = np.random.rand(2, 3, 7, 7)
-    col1 = im2col(x1, 5, 5, stride=1, pad=0)
-    print(col1)
+    x1 = np.random.rand(2, 3, 4, 4)
+    col1 = im2col(x1, 2, 2, stride=3, pad=0)
+    x2 = col2im(col1, x1.shape, 2, 2, stride=3, pad=0)
+
+    print(x1.shape)
+    print(x2.shape)
