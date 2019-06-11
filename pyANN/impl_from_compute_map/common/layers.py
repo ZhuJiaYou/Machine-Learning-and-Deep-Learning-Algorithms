@@ -9,9 +9,48 @@ class Convolution:
         self.b = b
         self.stride = stride
         self.pad = pad
+
+        # intermediate data(use in backward)
+        self.x = None
+        self.col = None
+        self.col_w = None
+
+        # gradients of weights and biases
+        self.dw = None
+        self.db = None
     def forward(self, x):
         FN, C, FH, FW = self.w.shape
         N, C, H, W = x.shape
+        out_h = (H + 2*pad - filter_h) // stride + 1
+        out_w = (W + 2*pad - filter_w) // stride + 1
+
+        col = im2col(x, FH, FW, self.stride, self.pad)
+        col_w = self.w.reshape(FN, -1).T
+
+        out = np.dot(col, col_w) + self.b
+        out = out.reshape(N, out_h, out_w, -1).transpose(0, 3, 1, 2)
+
+        self.x = x
+        self.col = col
+        self.col_w = col_w
+    
+        return out
+
+    def backward(self, dout):
+        FN, C, FH, FW = self.w.shape
+        dout = dout.transpose(0, 2, 3, 1).reshape(-1, FN)
+
+        self.db = np.sum(dout, axi=0)
+        self.dw = np.dot(self.col.T, dout)
+        self.dw = self.dw.transpose(1, 0).reshape(FN, C, FH, FW)
+
+        dcol = np.dot(dout, self.col_w.T)
+        dx = col2im(dcol, self.x.shape, FH, FW, self.stride, self.pad)
+        return dx
+        
+
+
+
         
 
 
