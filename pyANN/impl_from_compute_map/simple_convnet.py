@@ -1,13 +1,13 @@
 import pickle
 import numpy as np
 from collections import OrderedDict
-from common.layers import *
+from common.layers import Convolution, Affine, SoftmaxWithLoss, Relu, Pooling
 from common.gradient import numerical_gradient
 
 
 class SimpleConvnet:
-    def __init__(self, input_dim=(1, 28, 28), 
-                 conv_param={'filter_num': 30, 'filter_size': 5, 'pad': 0, 'stride': 1}, 
+    def __init__(self, input_dim=(1, 28, 28),
+                 conv_param={'filter_num': 30, 'filter_size': 5, 'pad': 0, 'stride': 1},
                  hidden_size=100, output_size=10, weight_init_std=0.01):
         filter_num = conv_param['filter_num']
         filter_size = conv_param['filter_size']
@@ -19,7 +19,7 @@ class SimpleConvnet:
 
         # weights init
         self.params = {}
-        self.params['w1'] = weight_init_std * np.random.randn(filter_num, input_dim[0], 
+        self.params['w1'] = weight_init_std * np.random.randn(filter_num, input_dim[0],
                                                               filter_size, filter_size)
         self.params['b1'] = np.zeros(filter_num)
         self.params['w2'] = weight_init_std * np.random.randn(pool_output_size, hidden_size)
@@ -29,7 +29,7 @@ class SimpleConvnet:
 
         # gen layers
         self.layers = OrderedDict()
-        self.layers['Conv1'] = Convolution(self.params['w1'], self.params['b1'], conv_param['stride'], \
+        self.layers['Conv1'] = Convolution(self.params['w1'], self.params['b1'], conv_param['stride'],
                                            conv_param['pad'])
         self.layers['Relu1'] = Relu()
         self.layers['Pool1'] = Pooling(pool_h=2, pool_w=2, stride=2)
@@ -56,11 +56,11 @@ class SimpleConvnet:
             tt = t[i*batch_size:(i+1)*batch_size]
             y = self.predict(tx)
             y = np.argmax(y, axis=1)
-            acc += np.sum(y == t)
+            acc += np.sum(y == tt)
         return acc / x.shape[0]
 
     def numerical_gradient(self, x, t):
-        loss_w = lambda w: self.loss(x, t)
+        loss_w = lambda w: self.loss(x, t)  # NOQA
         grads = {}
         for idx in (1, 2, 3):
             grads['w'+str(idx)] = numerical_gradient(loss_w, self.params['w'+str(idx)])
@@ -78,7 +78,7 @@ class SimpleConvnet:
         layers.reverse()
         for layer in layers:
             dout = layer.backward(dout)
-        
+
         # settings
         grads = {}
         grads['w1'], grads['b1'] = self.layers['Conv1'].dw, self.layers['Conv1'].db
@@ -97,9 +97,8 @@ class SimpleConvnet:
     def load_params(self, file_name='params.pkl'):
         with open(file_name, 'rb') as f:
             params = pickle.load(f)
-        for key, val in self.params.items():
+        for key, val in params.items():
             self.params[key] = val
         for i, key in enumerate(['Conv1', 'Affine1', 'Affine2']):
             self.layers[key].w = self.params['w'+str(i+1)]
             self.layers[key].b = self.params['b'+str(i+1)]
-

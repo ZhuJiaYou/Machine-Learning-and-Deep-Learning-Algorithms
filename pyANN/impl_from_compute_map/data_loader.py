@@ -45,7 +45,7 @@ def padding(image, zero_num):
     return image_padding
 
 
-def dataset_loader(data_dir):
+def dataset_loader(data_dir, flatten=True):
     train_image = read_image(os.path.join(data_dir, "train-images.idx3-ubyte"))
     train_label = read_label(os.path.join(data_dir, "train-labels.idx1-ubyte"))
     test_image = read_image(os.path.join(data_dir, "t10k-images.idx3-ubyte"))
@@ -61,6 +61,9 @@ def dataset_loader(data_dir):
 
 #    train_image = padding(train_image, 2)
 #    test_image = padding(test_image, 2)
+    if not flatten:
+        train_image = train_image.reshape(-1, 1, 28, 28)
+        test_image = test_image.reshape(-1, 1, 28, 28)
 
     return train_image, train_label, test_image, test_label
 
