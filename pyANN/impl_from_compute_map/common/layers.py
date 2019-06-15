@@ -1,5 +1,5 @@
 import numpy as np
-from common.funcs import *
+from common.funcs import sigmoid, cross_entropy_error, softmax
 from common.util import im2col, col2im
 
 
@@ -27,7 +27,7 @@ class Pooling:
 
         self.x = x
         self.arg_max = arg_max
-    
+
         return out
 
     def backward(self, dout):
@@ -58,6 +58,7 @@ class Convolution:
         # gradients of weights and biases
         self.dw = None
         self.db = None
+
     def forward(self, x):
         FN, C, FH, FW = self.w.shape
         N, C, H, W = x.shape
@@ -73,21 +74,21 @@ class Convolution:
         self.x = x
         self.col = col
         self.col_w = col_w
-    
+
         return out
 
     def backward(self, dout):
         FN, C, FH, FW = self.w.shape
         dout = dout.transpose(0, 2, 3, 1).reshape(-1, FN)
 
-        self.db = np.sum(dout, axi=0)
+        self.db = np.sum(dout, axis=0)
         self.dw = np.dot(self.col.T, dout)
         self.dw = self.dw.transpose(1, 0).reshape(FN, C, FH, FW)
 
         dcol = np.dot(dout, self.col_w.T)
         dx = col2im(dcol, self.x.shape, FH, FW, self.stride, self.pad)
         return dx
-        
+
 
 class Dropout:
     def __init__(self, dropout_ratio=0.5):
@@ -203,11 +204,11 @@ class Affine:
         self.x = None
         self.dw = None
         self.db = None
-#        self.original_x_shape = None
+        self.original_x_shape = None
 
     def forward(self, x):
-#        self.original_x_shape = x.shape
-#        x = x.reshape(x.shape[0], -1)
+        self.original_x_shape = x.shape
+        x = x.reshape(x.shape[0], -1)
         self.x = x
         out = np.dot(self.x, self.w) + self.b
         return out
@@ -216,7 +217,7 @@ class Affine:
         dx = np.dot(dout, self.w.T)
         self.dw = np.dot(self.x.T, dout)
         self.db = np.sum(dout, axis=0)
-#        dx = dx.reshape(*self.original_x_shape)
+        dx = dx.reshape(*self.original_x_shape)
         return dx
 
 
@@ -279,4 +280,3 @@ class AddLayer:
         dx = dout * 1
         dy = dout * 1
         return dx, dy
-
