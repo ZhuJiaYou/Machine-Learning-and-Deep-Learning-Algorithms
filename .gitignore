@@ -5,3 +5,4 @@
 *.idx1-ubyte
 *.idx3-ubyte
 *.pkl
+/pyANN/impl_from_compute_map/.ipynb_checkpoints/
